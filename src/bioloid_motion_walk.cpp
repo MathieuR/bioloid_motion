@@ -22,7 +22,9 @@ walk_joint_function::walk_joint_function():
 	offset(0),
 	scale(1),
 	in_offset(0),
-	in_scale(1)
+	in_scale(1),
+	fout_above(0),
+	fout_below(0)
 {
 
 }
@@ -33,6 +35,8 @@ walk_joint_function::walk_joint_function(const walk_joint_function& function)
 	scale = function.scale;
 	in_offset = function.in_offset;
 	in_scale = function.in_scale;
+	fout_below = function.fout_below;
+	fout_above = function.fout_above;
 }
 
 walk_joint_function::~walk_joint_function()
@@ -43,8 +47,15 @@ walk_joint_function::~walk_joint_function()
 double walk_joint_function::get_y(double x)
 {
 	double f = sin(in_offset + in_scale * x);
+	f = offset + scale * f;
+	if (fout_above)
+		if (f > fout_above)
+			f = fout_above;
+	if (fout_below)
+		if (f < fout_below)
+			f = fout_below;
 
-	return offset + scale * f;
+	return f;
 }
 
 void walk_joint_function::clone(const walk_joint_function* function)
@@ -53,12 +64,17 @@ void walk_joint_function::clone(const walk_joint_function* function)
 	scale = function->scale;
 	in_offset = function->in_offset;
 	in_scale = function->in_scale;
+	fout_below = function->fout_below;
+	fout_above = function->fout_above;
 }
 
 void walk_joint_function::mirror(void)
 {
 	offset *= -1;
 	scale *= -1;
+	double tmp = fout_below * -1;
+	fout_below = fout_above * -1;
+	fout_above = tmp;
 }
 
 void walk_joint_function::print(void)
@@ -102,19 +118,26 @@ double walk_joint_function::in_scale_get(void)
 	return in_scale;
 }
 
+void walk_joint_function::fout_below_set(double new_fout)
+{
+	fout_below = new_fout;
+}
+
 walk_joint_function& walk_joint_function::operator= (const walk_joint_function& clone)
 {
 	scale = clone.scale;
 	in_scale = clone.in_scale;
 	offset = clone.offset;
 	in_offset = clone.in_offset;
+	fout_below = clone.fout_below;
+	fout_above = clone.fout_above;
 
 	return *this;
 }
 
 
 walk_function::walk_function():
-	swing_scale(0.2),
+	swing_scale(0.4),
 	step_scale(0.3),
 	step_offset(0.55),
 	ankle_offset(0),
@@ -159,6 +182,7 @@ void walk_function::generate(void)
 	// f1 = thigh1=ankle1=L=R in phase
 	f1.in_scale_set(pi());
 	f1.scale_set(-1 * swing_scale);
+	f1.fout_below_set(f1.scale_get()/2);
 	pfn.insert(std::pair<std::string, walk_joint_function>("l_ankle_lateral_joint", f1));
 	pfn.insert(std::pair<std::string, walk_joint_function>("l_hip_lateral_joint", f1));
 

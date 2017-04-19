@@ -41,6 +41,7 @@ class walk_joint_function
   double scale_get(void);
   void in_scale_set(double new_in_scale);
   double in_scale_get(void);
+  void fout_below_set(double new_fout);
   walk_joint_function& operator= (const walk_joint_function& clone);
  private:
 
@@ -48,6 +49,9 @@ class walk_joint_function
   double scale;
   double in_offset;
   double in_scale;
+
+  double fout_above;
+  double fout_below;
 };
 
 class walk_function
