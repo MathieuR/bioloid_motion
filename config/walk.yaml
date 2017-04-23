@@ -2,4 +2,4 @@
 
 # walker loop
 walker:
-  loop_hz: 50
+  loop_hz: 100
