@@ -113,6 +113,12 @@ class walker
 	bool walking_get(void);
 	void velocity_update(std::vector<double> target, double n);
 	double get_distance_to_ready(void);
+
+	// Name of this class
+	std::string name_;
+
+	// Frequency
+	int loop_hz = 0;
 };
 
 #endif // BIOLOID_WALK_H_

@@ -1,0 +1,5 @@
+# bioloid_motion Settings
+
+# walker loop
+walker:
+  loop_hz: 50

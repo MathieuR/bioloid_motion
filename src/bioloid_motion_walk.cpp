@@ -17,6 +17,7 @@
 #include <cmath>
 #include <iostream>
 #include <bioloid_motion/bioloid_motion_walk.h>
+#include <rosparam_shortcuts/rosparam_shortcuts.h>
 
 walk_joint_function::walk_joint_function():
 	offset(0),
@@ -375,10 +376,21 @@ void walk_function::print(void)
 }
 
 walker::walker(bioloid_robot *robot):
-		nodeh_priv_("~"),
+		nodeh_priv_("walker"),
 		robotp(robot),
-		running(false)
+		running(false),
+		name_("walker")
 {
+	// Load rosparams
+	std::size_t error = 0;
+	error += !rosparam_shortcuts::get(name_, nodeh_priv_, "loop_hz", loop_hz);
+	if (error)
+	{
+		ROS_WARN_STREAM_NAMED(name_, "Walker requires the following config in the yaml:");
+		ROS_WARN_STREAM_NAMED(name_, "   loop_hz: <x> $  10 < x < 100");
+	}
+	rosparam_shortcuts::shutdownIfError(name_, error);
+
 	velocity_target.resize(3,0.0);
 	velocity_current.resize(3,0.0);
 
@@ -479,15 +491,16 @@ double walker::get_distance_to_ready(void)
 void walker::update(void)
 {
 
-	// 10 HZ loop
-	ros::Rate loop_rate(10);
-
 	// Global walk loop
 	uint32_t n = 50;
 	uint32_t p = true;
 	uint32_t i = 0;
 	double x = 0.0;
 	joints_t angles;
+
+	ros::Rate r(loop_hz);
+
+	ROS_INFO_STREAM_NAMED(name_, "Loop rate is set to: " << loop_hz);
 
 	velocity_current = { 0.0, 0.0, 0.0};
 
@@ -515,7 +528,7 @@ void walker::update(void)
 		}
 
 		ros::spinOnce();
-		loop_rate.sleep();
+		r.sleep();
 	}
 }
 
