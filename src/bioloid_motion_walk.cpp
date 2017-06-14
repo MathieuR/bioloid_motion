@@ -178,6 +178,10 @@ void walk_function::generate(void)
 	walk_joint_function f5;
 	walk_joint_function f6;
 	walk_joint_function f7;
+	// ARMS
+	walk_joint_function f8;
+	walk_joint_function f9;
+	walk_joint_function f10;
 
 
 	// f1 = thigh1=ankle1=L=R in phase
@@ -236,6 +240,21 @@ void walk_function::generate(void)
 	f7.clone(&f4);
 	f7.scale_set(0);
 	afn.insert(std::pair<std::string,walk_joint_function>("l_knee_joint", f7));
+
+	f8.scale_set(0);
+	f8.offset_set(0.8);
+	pfn.insert(std::pair<std::string, walk_joint_function>("l_shoulder_lateral_joint", f8));
+	pfn.insert(std::pair<std::string, walk_joint_function>("l_elbow_joint", f8));
+	afn.insert(std::pair<std::string, walk_joint_function>("l_shoulder_lateral_joint", f8));
+	afn.insert(std::pair<std::string, walk_joint_function>("l_elbow_joint", f8));
+
+	f9.in_scale_set(pi());
+	f9.scale_set(0.8);
+	f9.offset_set(1.5);
+	pfn.insert(std::pair<std::string, walk_joint_function>("l_shoulder_swing_joint", f9));
+	f10.clone(&f9);
+	f10.mirror();
+	afn.insert(std::pair<std::string, walk_joint_function>("l_shoulder_swing_joint", f10));
 
 	generate_right();
 
@@ -353,9 +372,13 @@ void walk_function::generate_right(void)
 		ROS_INFO_STREAM("generate right: " << j);
 		j.erase(0, 2);
 		pfn["r_"+j].clone(&afn["l_"+j]);
-		pfn["r_"+j].mirror();
+		if ((j != "shoulder_lateral_joint") &&
+			(j != "elbow_joint"))
+			pfn["r_"+j].mirror();
 		afn["r_"+j].clone(&pfn["l_"+j]);
-		afn["r_"+j].mirror();
+		if ((j != "shoulder_lateral_joint") &&
+			(j != "elbow_joint"))
+			afn["r_"+j].mirror();
 	}
 }
 
